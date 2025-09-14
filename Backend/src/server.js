@@ -4,18 +4,22 @@ import dbconnect from "./config/db.js";
 import dotenv from 'dotenv'
 import rateLimiter from "./middleware/rateLimiter.js";
 import cors from 'cors';
+import path from 'path';
 
 dotenv.config()
 const port = process.env.PORT || 5001;
+const __dirname = path.resolve();
 const app = express()
 
 
 //middleware
-app.use(
-    cors({
-    origin: 'http://localhost:5173',
-})
-);
+if (process.env.NODE_ENV !== "production") {
+    app.use(
+        cors({
+            origin: 'http://localhost:5173',
+        })
+    );
+}
 app.use(express.json());
 app.use(rateLimiter);
 
@@ -26,10 +30,19 @@ app.use(rateLimiter);
 // })
 
 app.use('/api/notes', routerRoutes);
-dbconnect().then(()=>{
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")))
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    });
+}
+
+dbconnect().then(() => {
 
     app.listen(port, () => {
-        console.log("Server is running in port:",port);
-        
+        console.log("Server is running in port:", port);
+
     })
 })
