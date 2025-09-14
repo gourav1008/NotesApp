@@ -139,11 +139,3 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 [Live Demo](https://notesapp-6rs9.onrender.com/) | [GitHub](https://github.com/your-username/notes-app)
 
 ---
-
-```
-
-Let me know if you want:
-- The exact placeholders filled (like screenshots, your name, etc.).
-- The `.env` file structure expanded with examples.
-- Additional sections like testing, deployment, or FAQs.
-```
