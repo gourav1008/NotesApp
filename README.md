@@ -24,14 +24,6 @@ Check out the live version of the Notes App and explore its features.
 
 ---
 
-## 📸 Screenshots
-
-<!-- Add your screenshots below -->
-![Screenshot 1](https://via.placeholder.com/600x400?text=Screenshot+1)
-![Screenshot 2](https://via.placeholder.com/600x400?text=Screenshot+2)
-
----
-
 ## 🛠️ Tech Stack
 
 ### Frontend
