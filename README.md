@@ -134,8 +134,8 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ---
 
-## ❤️ Made with passion by \[Your Name]
+## ❤️ Made with passion by \ Gourav Gupta 
 
-[Live Demo](https://notesapp-6rs9.onrender.com/) | [GitHub](https://github.com/your-username/notes-app)
+[Live Demo](https://notesapp-6rs9.onrender.com/) | [GitHub](https://github.com/gourav1008/notes-app)
 
 ---
