@@ -1,6 +1,6 @@
 import express from "express"
 import routerRoutes from './routes/notesRoutes.js'
-import authRoutes from './routes/authRoutes.js'; // Import auth routes
+import authRoutes from './routes/authRoutes.js'; 
 import adminRoutes from './routes/adminRoutes.js';
 import dbconnect from "./config/db.js";
 import dotenv from 'dotenv'
