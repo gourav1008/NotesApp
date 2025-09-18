@@ -7,11 +7,16 @@ import dotenv from 'dotenv'
 import rateLimiter from "./middleware/rateLimiter.js";
 import cors from 'cors';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config()
 const port = process.env.PORT || 5001;
 const app = express()
 
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 //middleware
 app.use(
@@ -22,15 +27,23 @@ app.use(
 app.use(express.json());
 app.use(rateLimiter);
 
-// Our simple custom middleware
-// app.use((req, res, next)=>{
-//     console.log(`The methode is ${req.method} from the url ${req.url}`);
-//     next();
-// })
-
-app.use('/api/auth', authRoutes); // Add auth routes
+// API routes
+app.use('/api/auth', authRoutes);
 app.use('/api/notes', routerRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Serve static files from the React frontend app
+app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+
+// Handle client-side routing - always return the main index.html
+app.get('*', (req, res) => {
+    // Don't handle /api routes here
+    if (!req.url.startsWith('/api')) {
+        res.sendFile(path.join(__dirname, '../../Frontend/dist/index.html'));
+    } else {
+        next();
+    }
+});
 
 // Error handling middleware (must be after routes)
 app.use(notFound);
