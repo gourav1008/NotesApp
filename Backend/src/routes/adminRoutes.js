@@ -30,9 +30,9 @@ router.get("/user-details/:userId", protect, admin, getUserDetails);
 router.get("/messages", protect, getMessagesForUser);
 
 // In MongoDB shell or Compass
-db.users.updateOne(
-    { email: "your-email@example.com" },
-    { $set: { isAdmin: true } }
-)
+// db.users.updateOne(
+//     { email: "your-email@example.com" },
+//     { $set: { isAdmin: true } }
+// )
 
 export default router;
