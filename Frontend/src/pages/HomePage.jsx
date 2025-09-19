@@ -5,19 +5,22 @@ import NoteCard from '../components/NoteCard';
 import api from '../lib/axios'
 import NoteNoteFound from '../components/NoteNoteFound'
 
-const HomePage = () => {
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-  const [isRateLimited, setIsRateLimited] = useState(false)
-  const [notes, setNotes] = useState([])
-  const [loading, setloading] = useState(true)
+const HomePage = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const [loading, setloading] = useState(true);
 
   useEffect(() => {
     const fetchNotes = async () => {
-      // Check for token first
-      const token = localStorage.getItem('token');
-      if (!token) {
+      if (!isAuthenticated) {
         setloading(false);
-        toast.error('Please login to view notes');
+        navigate('/login');
         return;
       }
 
@@ -30,27 +33,24 @@ const HomePage = () => {
           setIsRateLimited(false);
         } else {
           console.error('Invalid notes data format:', res.data);
-          toast.error('Error: Invalid data format received');
+          toast.error('Error loading notes. Please try again.');
         }
       } catch (error) {
         console.error('Error fetching notes:', error);
         
         if (error.response?.status === 401) {
-          // Clear invalid token
-          localStorage.removeItem('token');
-          toast.error('Session expired. Please login again');
+          navigate('/login');
+          toast.error('Please login to view notes');
         } else if (error.response?.status === 429) {
           setIsRateLimited(true);
           toast.error('Too many requests. Please try again later');
         } else {
           const errorMessage = error.response?.data?.error || 
                              error.response?.data?.message || 
-                             error.message || 
-                             'Failed to load notes';
+                             'Failed to load notes. Please try again.';
           toast.error(errorMessage);
         }
         
-        // Clear notes on error
         setNotes([]);
       } finally {
         setloading(false);
@@ -58,7 +58,7 @@ const HomePage = () => {
     };
 
     fetchNotes();
-  }, [])
+  }, [isAuthenticated, navigate])
   return (
     <div className='min-h-screen'>
       {isRateLimited && <RateLimiterUI />}

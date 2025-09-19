@@ -1,42 +1,73 @@
 import { ArrowLeftIcon } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../lib/axios';
+import AuthContext from '../context/AuthContext';
 
 const CreatePage = () => {
+  const { isAuthenticated } = useContext(AuthContext);
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      toast.error('Please login to create notes');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title.trim() || !content.trim()) {
-      toast.error("All fields are require")
+    if (!isAuthenticated) {
+      navigate('/login');
+      toast.error('Please login to create notes');
       return;
     }
-    setLoading(true)
+
+    const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
+
+    if (!trimmedTitle || !trimmedContent) {
+      toast.error("Title and content are required");
+      return;
+    }
+
+    setLoading(true);
     try {
-      await api.post('/notes', {
-        title,
-        content
-      })
-      toast.success("Note Created successfully!")
-      navigate('/')
+      const response = await api.post('/notes', {
+        title: trimmedTitle,
+        content: trimmedContent
+      });
+
+      if (!response.data || !response.data._id) {
+        throw new Error('Invalid response from server');
+      }
+
+      toast.success("Note created successfully!");
+      navigate('/');
     } catch (error) {
-      console.log("Error creating note", error);
-      if (error.response.status === 429) {
+      console.error("Error creating note:", error);
+      
+      if (error.response?.status === 401) {
+        navigate('/login');
+        toast.error('Please login to create notes');
+      } else if (error.response?.status === 429) {
         toast.error("Slow down! You're creating notes too fast", {
           duration: 4000,
           icon: "💀"
         });
       } else {
-        toast.error('Failed to create note')
+        const errorMessage = error.response?.data?.error || 
+                           error.response?.data?.message || 
+                           'Failed to create note. Please try again.';
+        toast.error(errorMessage);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
 
   }

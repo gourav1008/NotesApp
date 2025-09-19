@@ -3,7 +3,7 @@ import api from "../lib/axios";
 
 const initialState = {
   user: null,
-  token: localStorage.getItem("token"),
+  token: null,  // Don't load from localStorage here
   isAuthenticated: false,
   loading: true,
 };
@@ -13,25 +13,52 @@ const AuthContext = createContext();
 const authReducer = (state, action) => {
   switch (action.type) {
     case "LOGIN_SUCCESS":
-      localStorage.setItem("token", action.payload.token);
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: true,
-        loading: false,
-      };
+      try {
+        localStorage.setItem("token", action.payload.token);
+        return {
+          ...state,
+          user: action.payload.user,
+          token: action.payload.token,
+          isAuthenticated: true,
+          loading: false,
+        };
+      } catch (error) {
+        console.error("Error saving token:", error);
+        return {
+          ...state,
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          loading: false,
+        };
+      }
     case "USER_LOADED":
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: true,
-        loading: false,
-      };
+      try {
+        localStorage.setItem("token", action.payload.token);
+        return {
+          ...state,
+          user: action.payload.user,
+          token: action.payload.token,
+          isAuthenticated: true,
+          loading: false,
+        };
+      } catch (error) {
+        console.error("Error saving token:", error);
+        return {
+          ...state,
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          loading: false,
+        };
+      }
     case "AUTH_ERROR":
     case "LOGOUT":
-      localStorage.removeItem("token");
+      try {
+        localStorage.removeItem("token");
+      } catch (error) {
+        console.error("Error removing token:", error);
+      }
       return {
         ...state,
         user: null,
@@ -49,18 +76,34 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        dispatch({ type: "AUTH_ERROR" });
-        return;
-      }
       try {
-        const res = await api.get("/auth/me");
-        dispatch({ type: "USER_LOADED", payload: { user: res.data.user, token } });
-      } catch (err) {
-        dispatch({ type: "AUTH_ERROR" });
-        console.log(err);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          dispatch({ type: "AUTH_ERROR" });
+          return;
+        }
+
+        // Set token in axios headers
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
+        const res = await api.get("/auth/me");
+        if (res.data?.user) {
+          dispatch({ type: "USER_LOADED", payload: { user: res.data.user, token } });
+        } else {
+          console.error("Invalid user data received:", res.data);
+          dispatch({ type: "AUTH_ERROR" });
+        }
+      } catch (err) {
+        console.error("Auth initialization error:", err);
+        dispatch({ type: "AUTH_ERROR" });
+        
+        // Clear invalid token
+        try {
+          localStorage.removeItem("token");
+          delete api.defaults.headers.common['Authorization'];
+        } catch (error) {
+          console.error("Error cleaning up auth state:", error);
+        }
       }
     };
     init();
