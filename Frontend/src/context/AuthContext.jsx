@@ -100,24 +100,28 @@ export const AuthProvider = ({ children }) => {
         // Set token in axios headers
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
-        const res = await api.get("/auth/me");
-        if (res.data?.user) {
-          dispatch({ type: "USER_LOADED", payload: { user: res.data.user, token } });
-        } else {
-          console.error("Invalid user data received:", res.data);
-          dispatch({ type: "AUTH_ERROR" });
+        try {
+          const res = await api.get("/auth/me");
+          if (res.data?.user) {
+            dispatch({ type: "USER_LOADED", payload: { user: res.data.user, token } });
+          } else {
+            console.error("Invalid user data received:", res.data);
+            dispatch({ type: "AUTH_ERROR" });
+          }
+        } catch (apiError) {
+          console.error("API error during auth check:", apiError);
+          
+          // Only clear token if it's an auth error (401)
+          if (apiError.response?.status === 401) {
+            dispatch({ type: "AUTH_ERROR" });
+          } else {
+            // For other errors (like network issues), keep the token but set loading to false
+            dispatch({ type: "AUTH_ERROR" });
+          }
         }
       } catch (err) {
         console.error("Auth initialization error:", err);
         dispatch({ type: "AUTH_ERROR" });
-        
-        // Clear invalid token
-        try {
-          localStorage.removeItem("token");
-          delete api.defaults.headers.common['Authorization'];
-        } catch (error) {
-          console.error("Error cleaning up auth state:", error);
-        }
       }
     };
     init();

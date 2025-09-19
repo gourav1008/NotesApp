@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url';
 
 dotenv.config()
 const port = process.env.PORT || 5001;
+const fallbackPort = 5002; // Fallback port if 5001 is in use
 const app = express()
 
 // Get __dirname equivalent in ES modules
@@ -21,7 +22,15 @@ const __dirname = path.dirname(__filename);
 //middleware
 app.use(
     cors({
-        origin: 'http://localhost:5174', // Frontend development server
+        origin: function(origin, callback) {
+            // Allow requests from both possible frontend ports
+            const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true, // Allow credentials
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization']
@@ -58,9 +67,18 @@ app.use(notFound);
 app.use(errorHandler);
 
 dbconnect().then(()=>{
-
-    app.listen(port, () => {
-        console.log("Server is running in port:",port);
-        
-    })
+    // Try to listen on the primary port
+    const server = app.listen(port, () => {
+        console.log("Server is running in port:", port);
+    }).on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            // If primary port is in use, try the fallback port
+            console.log(`Port ${port} is in use, trying fallback port ${fallbackPort}...`);
+            const fallbackServer = app.listen(fallbackPort, () => {
+                console.log("Server is running in fallback port:", fallbackPort);
+            });
+        } else {
+            console.error("Server error:", err);
+        }
+    });
 })

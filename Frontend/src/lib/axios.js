@@ -1,13 +1,15 @@
 import axios from 'axios';
 
+// In production, use relative path, in development use the fallback port since we know it's running there
+const baseURL = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5001/api',  // Use explicit backend URL in development
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   },
-  // Add timeout to prevent hanging requests
   timeout: 10000,
-  withCredentials: true  // Enable sending cookies and auth headers
+  withCredentials: true
 });
 
 // Add request interceptor for auth token
@@ -30,10 +32,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Handle different types of errors
+    if (!error.response) {
+      // Network error or server not responding
+      error.message = 'Unable to connect to the server. Please check your internet connection.';
+    } else if (error.response.status === 401) {
       // Clear token on auth error
       localStorage.removeItem('token');
+      error.message = 'Authentication failed. Please log in again.';
+    } else if (error.response.status === 400) {
+      error.message = error.response.data?.message || 'Invalid request. Please check your input.';
+    } else if (error.response.status === 500) {
+      error.message = 'Server error. Please try again later.';
     }
+    
     return Promise.reject(error);
   }
 );

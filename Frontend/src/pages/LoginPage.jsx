@@ -36,34 +36,38 @@ const LoginPage = () => {
     }
 
     try {
-      // Clean up any existing auth state before login attempt
-      dispatch({ type: "AUTH_ERROR" });
+      // Show loading toast
+      const loadingToast = toast.loading("Logging in...");
       
       const res = await api.post("/auth/login", { 
         email: trimmedEmail, 
         password: trimmedPassword 
       });
       
-      if (!res.data || !res.data.token || !res.data.user) {
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+      
+      if (!res.data || !res.data.token) {
         throw new Error("Invalid response from server");
       }
 
-      // Update auth state which will handle token storage and headers
+      // Store token in localStorage first
+      localStorage.setItem("token", res.data.token);
+      
+      // Set token in axios headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+      
+      // Update auth state
       dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
-
-      // Verify the login was successful by making a test request
-      try {
-        await api.get("/auth/me");
-        toast.success("Login successful!");
-        navigate("/");
-      } catch (verifyError) {
-        console.error("Login verification failed:", verifyError);
-        throw new Error("Login verification failed");
-      }
+      
+      toast.success("Login successful!");
+      navigate("/");
     } catch (error) {
       console.error("Login error:", error);
       
       // Clean up auth state
+      localStorage.removeItem("token");
+      delete api.defaults.headers.common['Authorization'];
       dispatch({ type: "AUTH_ERROR" });
       
       const errorMessage = error.response?.data?.error || 
