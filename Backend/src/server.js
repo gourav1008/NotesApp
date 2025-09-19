@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 app.get('*', (req, res) => {
     // Don't handle /api routes here
     if (!req.url.startsWith('/api')) {
-        res.sendFile(path.join(__dirname, '../Frontend','dist', 'index.html'));
+        res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
     } else {
         next();
     }

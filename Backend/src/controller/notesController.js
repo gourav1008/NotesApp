@@ -6,10 +6,10 @@ const rateLimit = {
     max: 100 // limit each IP to 100 requests per windowMs
 };
 
-// Get all notes
+// Get user's notes
 export const getNotes = async (req, res) => {
     try {
-        const notes = await Note.find().sort({ createdAt: -1 });
+        const notes = await Note.find({ userId: req.user.id }).sort({ createdAt: -1 });
         res.json(notes);
     } catch (error) {
         console.error("Error in getNotes:", error);
@@ -46,8 +46,12 @@ export const postNotes = async (req, res) => {
 export const updateNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const note = await Note.findByIdAndUpdate(id, req.body, { new: true });
-        if (!note) return res.status(404).json({ message: "Note not found" });
+        const note = await Note.findOneAndUpdate(
+            { _id: id, userId: req.user.id },
+            req.body,
+            { new: true }
+        );
+        if (!note) return res.status(404).json({ message: "Note not found or you don't have permission to update it" });
         res.json(note);
     } catch (error) {
         console.error("Error in updateNote:", error);
@@ -59,8 +63,8 @@ export const updateNote = async (req, res) => {
 export const deleteNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const note = await Note.findByIdAndDelete(id);
-        if (!note) return res.status(404).json({ message: "Note not found" });
+        const note = await Note.findOneAndDelete({ _id: id, userId: req.user.id });
+        if (!note) return res.status(404).json({ message: "Note not found or you don't have permission to delete it" });
         res.json({ message: "Note deleted successfully" });
     } catch (error) {
         console.error("Error in deleteNote:", error);

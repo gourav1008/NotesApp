@@ -27,7 +27,7 @@ const LoginPage = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/api/auth/login", { email, password });
+      const res = await api.post("/auth/login", { email, password });
       if (res.data && res.data.token) {
         dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
         toast.success("Login successful!");
