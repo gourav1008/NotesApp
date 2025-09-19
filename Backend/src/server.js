@@ -33,13 +33,18 @@ app.use('/api/notes', routerRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+app.use(express.static(path.join(__dirname, '../../../Frontend/dist')));
 
 // Handle client-side routing - always return the main index.html
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
     // Don't handle /api routes here
     if (!req.url.startsWith('/api')) {
-        res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
+        res.sendFile(path.join(__dirname, '../../../Frontend/dist/index.html'), (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                res.status(500).send('Error loading application');
+            }
+        });
     } else {
         next();
     }

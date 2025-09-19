@@ -22,16 +22,30 @@ async function buildAndCopyFrontend() {
             });
         });
 
-        // Ensure dist directory exists
-        const distPath = path.join(__dirname, '../Frontend/dist');
+        // Ensure source dist directory exists
+        const sourcePath = path.join(__dirname, '../Frontend/dist');
         try {
-            await fs.access(distPath);
+            await fs.access(sourcePath);
         } catch {
             console.error('Frontend build directory not found. Make sure the frontend build was successful.');
             process.exit(1);
         }
 
-        console.log('Frontend built successfully!');
+        // Create the target directory if it doesn't exist
+        const targetPath = path.join(__dirname, 'Frontend/dist');
+        try {
+            await fs.mkdir(path.join(__dirname, 'Frontend'), { recursive: true });
+        } catch (err) {
+            if (err.code !== 'EEXIST') {
+                throw err;
+            }
+        }
+
+        // Copy the dist directory
+        console.log('Copying frontend build files...');
+        await fs.cp(sourcePath, targetPath, { recursive: true });
+
+        console.log('Frontend built and copied successfully!');
     } catch (error) {
         console.error('Build script failed:', error);
         process.exit(1);
