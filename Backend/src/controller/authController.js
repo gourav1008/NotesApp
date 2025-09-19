@@ -37,8 +37,10 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
+  console.log("Login attempt for email:", email);
 
   if (!email || !password) {
+    console.log("Login failed: Missing email or password");
     return res.status(400).json({ success: false, error: "Please provide email and password" });
   }
 
@@ -46,12 +48,15 @@ export const login = async (req, res, next) => {
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
+      console.log("Login failed: User not found for email:", email);
       return res.status(401).json({ success: false, error: "Invalid credentials" });
     }
 
     const isMatch = await user.matchPasswords(password);
+    console.log("Password match result for", email, ":", isMatch);
 
     if (!isMatch) {
+      console.log("Login failed: Invalid password for email:", email);
       return res.status(401).json({ success: false, error: "Invalid credentials" });
     }
 
