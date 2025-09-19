@@ -21,7 +21,10 @@ const __dirname = path.dirname(__filename);
 //middleware
 app.use(
     cors({
-        origin: '*', // Allow all origins — use only in development
+        origin: 'http://localhost:5174', // Frontend development server
+        credentials: true, // Allow credentials
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
     })
 );
 app.use(express.json());

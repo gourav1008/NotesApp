@@ -1,12 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',  // Always use relative path for consistency
+  baseURL: 'http://localhost:5001/api',  // Use explicit backend URL in development
   headers: {
     'Content-Type': 'application/json'
   },
   // Add timeout to prevent hanging requests
-  timeout: 10000
+  timeout: 10000,
+  withCredentials: true  // Enable sending cookies and auth headers
 });
 
 // Add request interceptor for auth token
