@@ -1,23 +1,40 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: (import.meta.env.PROD 
-    ? '/api'  // In production, use relative path
-    : (import.meta.env.VITE_API_URL || 'http://localhost:5001/api')
-  ).replace(/\/$/, ''),
+  baseURL: '/api',  // Always use relative path for consistency
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  // Add timeout to prevent hanging requests
+  timeout: 10000
 });
 
-// Attach Authorization header if token exists in localStorage
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
+// Add request interceptor for auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
   }
-  return config;
-});
+);
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear token on auth error
+      localStorage.removeItem('token');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

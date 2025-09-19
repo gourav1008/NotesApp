@@ -28,29 +28,60 @@ const RegisterPage = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate inputs
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
+
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters long");
       return;
     }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     try {
-      const response = await api.post("/auth/register", { name, email, password });
+      // Clear any existing token before registration
+      localStorage.removeItem('token');
+      
+      const response = await api.post("/auth/register", { 
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password 
+      });
 
       if (response.data && response.data.token) {
-        // Immediately authenticate user after successful registration
+        // Store token first
+        localStorage.setItem('token', response.data.token);
+        // Then update state
         dispatch({ type: "LOGIN_SUCCESS", payload: response.data });
         toast.success("Registration successful! Welcome to your notes.");
         navigate("/");
       } else {
-        throw new Error(response.data?.error || "Registration failed");
+        throw new Error("Invalid response from server");
       }
     } catch (error) {
       console.error("Registration error:", error);
+      dispatch({ type: "AUTH_ERROR" });
+      
+      // Clear any existing token
+      localStorage.removeItem('token');
+      
       const errorMessage =
         error.response?.data?.error ||
+        error.response?.data?.message ||
         error.message ||
         "Registration failed. Please try again.";
       toast.error(errorMessage);

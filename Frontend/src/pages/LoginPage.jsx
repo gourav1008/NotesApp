@@ -26,17 +26,36 @@ const LoginPage = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
     try {
       const res = await api.post("/auth/login", { email, password });
+      
       if (res.data && res.data.token) {
+        // Store token first
+        localStorage.setItem('token', res.data.token);
+        // Then update state
         dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
         toast.success("Login successful!");
         navigate("/");
+      } else {
+        throw new Error("Invalid response from server");
       }
     } catch (error) {
       console.error("Login error:", error);
       dispatch({ type: "AUTH_ERROR" });
-      const errorMessage = error.response?.data?.message || "Invalid email or password";
+      
+      // Clear any existing token
+      localStorage.removeItem('token');
+      
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         error.message || 
+                         "Login failed. Please check your credentials and try again.";
       toast.error(errorMessage);
     }
   };

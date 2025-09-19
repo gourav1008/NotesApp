@@ -13,24 +13,50 @@ const HomePage = () => {
 
   useEffect(() => {
     const fetchNotes = async () => {
-      try {
-        const res = await api.get('/notes')
-        console.log('Notes response:', res.data);
-        setNotes(res.data)
-        setIsRateLimited(false)
-      } catch (error) {
-        console.log('Error fetching notes:', error);
-        if (error.response?.status === 401) {
-          toast.error('Please login to view notes')
-        } else if (error.response?.status === 429) {
-          setIsRateLimited(true)
-        } else {
-          toast.error('Failed to load notes: ' + (error.response?.data?.message || error.message))
-        }
-      } finally {
-        setloading(false)
+      // Check for token first
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setloading(false);
+        toast.error('Please login to view notes');
+        return;
       }
-    }
+
+      try {
+        const res = await api.get('/notes');
+        console.log('Notes response:', res.data);
+        
+        if (Array.isArray(res.data)) {
+          setNotes(res.data);
+          setIsRateLimited(false);
+        } else {
+          console.error('Invalid notes data format:', res.data);
+          toast.error('Error: Invalid data format received');
+        }
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+        
+        if (error.response?.status === 401) {
+          // Clear invalid token
+          localStorage.removeItem('token');
+          toast.error('Session expired. Please login again');
+        } else if (error.response?.status === 429) {
+          setIsRateLimited(true);
+          toast.error('Too many requests. Please try again later');
+        } else {
+          const errorMessage = error.response?.data?.error || 
+                             error.response?.data?.message || 
+                             error.message || 
+                             'Failed to load notes';
+          toast.error(errorMessage);
+        }
+        
+        // Clear notes on error
+        setNotes([]);
+      } finally {
+        setloading(false);
+      }
+    };
+
     fetchNotes();
   }, [])
   return (
