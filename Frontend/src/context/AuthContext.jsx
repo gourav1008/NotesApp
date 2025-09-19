@@ -14,7 +14,10 @@ const authReducer = (state, action) => {
   switch (action.type) {
     case "LOGIN_SUCCESS":
       try {
+        // Set token in axios headers first
+        api.defaults.headers.common['Authorization'] = `Bearer ${action.payload.token}`;
         localStorage.setItem("token", action.payload.token);
+        
         return {
           ...state,
           user: action.payload.user,
@@ -23,7 +26,10 @@ const authReducer = (state, action) => {
           loading: false,
         };
       } catch (error) {
-        console.error("Error saving token:", error);
+        console.error("Error during login success:", error);
+        // Clean up on error
+        delete api.defaults.headers.common['Authorization'];
+        localStorage.removeItem("token");
         return {
           ...state,
           user: null,
@@ -34,7 +40,10 @@ const authReducer = (state, action) => {
       }
     case "USER_LOADED":
       try {
+        // Ensure token is in axios headers
+        api.defaults.headers.common['Authorization'] = `Bearer ${action.payload.token}`;
         localStorage.setItem("token", action.payload.token);
+        
         return {
           ...state,
           user: action.payload.user,
@@ -43,7 +52,10 @@ const authReducer = (state, action) => {
           loading: false,
         };
       } catch (error) {
-        console.error("Error saving token:", error);
+        console.error("Error during user load:", error);
+        // Clean up on error
+        delete api.defaults.headers.common['Authorization'];
+        localStorage.removeItem("token");
         return {
           ...state,
           user: null,
@@ -55,9 +67,11 @@ const authReducer = (state, action) => {
     case "AUTH_ERROR":
     case "LOGOUT":
       try {
+        // Clean up auth state
+        delete api.defaults.headers.common['Authorization'];
         localStorage.removeItem("token");
       } catch (error) {
-        console.error("Error removing token:", error);
+        console.error("Error during auth cleanup:", error);
       }
       return {
         ...state,

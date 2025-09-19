@@ -27,30 +27,44 @@ const LoginPage = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    
+    if (!trimmedEmail || !trimmedPassword) {
       toast.error("Please enter both email and password");
       return;
     }
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      // Clean up any existing auth state before login attempt
+      dispatch({ type: "AUTH_ERROR" });
       
-      if (res.data && res.data.token) {
-        // Store token first
-        localStorage.setItem('token', res.data.token);
-        // Then update state
-        dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
+      const res = await api.post("/auth/login", { 
+        email: trimmedEmail, 
+        password: trimmedPassword 
+      });
+      
+      if (!res.data || !res.data.token || !res.data.user) {
+        throw new Error("Invalid response from server");
+      }
+
+      // Update auth state which will handle token storage and headers
+      dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
+
+      // Verify the login was successful by making a test request
+      try {
+        await api.get("/auth/me");
         toast.success("Login successful!");
         navigate("/");
-      } else {
-        throw new Error("Invalid response from server");
+      } catch (verifyError) {
+        console.error("Login verification failed:", verifyError);
+        throw new Error("Login verification failed");
       }
     } catch (error) {
       console.error("Login error:", error);
-      dispatch({ type: "AUTH_ERROR" });
       
-      // Clear any existing token
-      localStorage.removeItem('token');
+      // Clean up auth state
+      dispatch({ type: "AUTH_ERROR" });
       
       const errorMessage = error.response?.data?.error || 
                          error.response?.data?.message || 

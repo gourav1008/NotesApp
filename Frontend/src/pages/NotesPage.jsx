@@ -142,58 +142,86 @@ const NotesPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <LoaderIcon className="animate-spin size-10" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="loading loading-spinner loading-lg text-primary"></div>
+          <p className="text-base-content/70 animate-pulse">Loading note...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <Link to="/" className="btn btn-ghost">
-              <ArrowLeftIcon className="h-5 w-5" />
-              Back to Notes
-            </Link>
-            <button onClick={handleDelete} className="btn btn-error btn-outline">
-              <Trash2Icon className="h-5 w-5" />
-              Delete Note
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-6">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <Link 
+                to="/" 
+                className="btn btn-ghost btn-sm sm:btn-md gap-2 hover:gap-3 transition-all"
+              >
+                <ArrowLeftIcon className="size-4 sm:size-5" />
+                <span className="hidden sm:inline">Back to Notes</span>
+                <span className="sm:hidden">Back</span>
+              </Link>
+            </div>
+            <button 
+              onClick={handleDelete} 
+              className="btn btn-error btn-outline btn-sm sm:btn-md w-full sm:w-auto"
+            >
+              <Trash2Icon className="size-4 sm:size-5" />
+              <span className="hidden sm:inline">Delete Note</span>
+              <span className="sm:hidden">Delete</span>
             </button>
           </div>
 
-          <div className="card bg-base-100">
-            <div className="card-body">
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Title</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Note title"
-                  className="input input-bordered"
-                  value={note.title}
-                  onChange={(e) => setNote({ ...note, title: e.target.value })}
-                />
-              </div>
+          <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="card-body p-4 sm:p-6 lg:p-8">
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-base sm:text-lg">Title</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter a descriptive title..."
+                    className="input input-bordered w-full focus:input-primary transition-colors duration-200"
+                    value={note.title}
+                    onChange={(e) => setNote({ ...note, title: e.target.value })}
+                    required
+                  />
+                </div>
 
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Content</span>
-                </label>
-                <textarea
-                  placeholder="Write your note here..."
-                  className="textarea textarea-bordered h-32"
-                  value={note.content}
-                  onChange={(e) => setNote({ ...note, content: e.target.value })}
-                />
-              </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-base sm:text-lg">Content</span>
+                  </label>
+                  <textarea
+                    placeholder="Write your note content here..."
+                    className="textarea textarea-bordered min-h-[12rem] sm:min-h-[16rem] w-full focus:textarea-primary transition-colors duration-200 font-mono text-sm sm:text-base"
+                    value={note.content}
+                    onChange={(e) => setNote({ ...note, content: e.target.value })}
+                    required
+                  />
+                </div>
 
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary" disabled={saving} onClick={handleSave}>
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
+                <div className="card-actions justify-end pt-4">
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary btn-sm sm:btn-md w-full sm:w-auto min-w-[8rem]" 
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <span className="flex items-center gap-2">
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Saving...
+                      </span>
+                    ) : (
+                      'Save Changes'
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
