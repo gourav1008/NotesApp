@@ -13,12 +13,13 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       // Check if JWT_SECRET is set
-      if (!process.env.JWT_SECRET) {
+      const JWT_SECRET = process.env.JWT_SECRET || process.env.VITE_JWT_SECRET;
+      if (!JWT_SECRET) {
         console.error("JWT_SECRET environment variable is not set!");
         return res.status(500).json({ success: false, error: "Server configuration error" });
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
       console.log("Token decoded successfully for user:", decoded.id);
 
       req.user = await User.findById(decoded.id).select("-password");

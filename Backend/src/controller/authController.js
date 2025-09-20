@@ -2,10 +2,11 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 const generateToken = (id) => {
-  const JWT_SECRET = process.env.JWT_SECRET;
+  const JWT_SECRET = process.env.JWT_SECRET || process.env.VITE_JWT_SECRET;
 
   if (!JWT_SECRET) {
     console.error("JWT_SECRET environment variable is not set!");
+    console.error("Available environment variables:", Object.keys(process.env));
     throw new Error("JWT_SECRET environment variable is required");
   }
 
@@ -37,6 +38,13 @@ export const register = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.error("Registration error:", error);
+    if (error.message.includes("JWT_SECRET")) {
+      return res.status(500).json({
+        success: false,
+        error: "Server configuration error. Please contact support."
+      });
+    }
     next(error);
   }
 };
@@ -78,6 +86,13 @@ export const login = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
+    if (error.message.includes("JWT_SECRET")) {
+      return res.status(500).json({
+        success: false,
+        error: "Server configuration error. Please contact support."
+      });
+    }
     next(error);
   }
 };
