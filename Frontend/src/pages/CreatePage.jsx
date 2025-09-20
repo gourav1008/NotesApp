@@ -72,55 +72,70 @@ const CreatePage = () => {
 
   }
   return (
-    <div className='min-h-screen bg-base-200'>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className='min-h-screen'>
+      <div className="container section-padding">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <Link 
               to='/' 
-              className='btn btn-ghost btn-sm sm:btn-md gap-2 hover:gap-3 transition-all'
+              className='back-button'
             >
-              <ArrowLeftIcon className='size-4 sm:size-5' />
-              <span className='hidden sm:inline'>Back to Notes</span>
-              <span className='sm:hidden'>Back</span>
+              <ArrowLeftIcon className='size-4' />
+              <span>Back to Notes</span>
             </Link>
-            <h2 className='text-lg sm:text-2xl font-bold text-base-content/90'>Create New Note</h2>
+            <h2 className='heading-responsive'>Create New Note</h2>
           </div>
 
-          <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="card-body p-4 sm:p-6 lg:p-8">
+          <div className="auth-card">
+            <div className="card-body">
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className='form-control'>
-                  <label className='label'>
-                    <span className='label-text text-base sm:text-lg'>Title</span>
+                <div className='form-group'>
+                  <label className='form-label'>
+                    <span>Title</span>
                   </label>
                   <input 
                     type="text"
                     placeholder='Enter a descriptive title...'
-                    className='input input-bordered w-full focus:input-primary transition-colors duration-200'
+                    className='form-input'
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
                   />
                 </div>
 
-                <div className='form-control'>
-                  <label className='label'>
-                    <span className='label-text text-base sm:text-lg'>Content</span>
+                <div className='form-group'>
+                  <label className='form-label'>
+                    <span>Content</span>
                   </label>
                   <textarea
-                    placeholder='Write your note content here...'
-                    className='textarea textarea-bordered min-h-[12rem] sm:min-h-[16rem] w-full focus:textarea-primary transition-colors duration-200 font-mono text-sm sm:text-base'
+                    placeholder='Write your note content here...
+
+💡 Tips:
+• Use bullet points for lists
+• Add line breaks for better readability
+• Write as much or as little as you need'
+                    className='form-textarea'
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     required
+                    rows={12}
                   />
+                  <div className="flex justify-between items-center text-xs text-base-content/60 mt-1">
+                    <span>Characters: {content.length}</span>
+                    <span>Words: {content.trim() ? content.trim().split(/\s+/).length : 0}</span>
+                  </div>
                 </div>
 
-                <div className="card-actions justify-end pt-4">
+                <div className="flex justify-end gap-3 pt-4">
+                  <Link 
+                    to="/" 
+                    className="btn-content-ghost"
+                  >
+                    Cancel
+                  </Link>
                   <button 
                     type='submit' 
-                    className='btn btn-primary btn-sm sm:btn-md w-full sm:w-auto min-w-[8rem]' 
+                    className='btn-content' 
                     disabled={loading}
                   >
                     {loading ? (

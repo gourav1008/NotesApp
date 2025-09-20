@@ -29,6 +29,16 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ success: false, error: "User not found" });
       }
 
+      // Check if user is blocked
+      if (req.user.isBlocked) {
+        console.log("Blocked user attempted access:", req.user.email);
+        return res.status(403).json({ 
+          success: false, 
+          error: "Account has been blocked. Please contact support.",
+          isBlocked: true
+        });
+      }
+
       console.log("User authenticated successfully:", req.user.email);
       next();
     } catch (error) {
@@ -50,4 +60,16 @@ export const admin = (req, res, next) => {
   } else {
     res.status(403).json({ success: false, error: "Admin access required" });
   }
+};
+
+// Middleware to check if user is not blocked (for regular users)
+export const notBlocked = (req, res, next) => {
+  if (req.user && req.user.isBlocked) {
+    return res.status(403).json({ 
+      success: false, 
+      error: "Account has been blocked. Please contact support.",
+      isBlocked: true
+    });
+  }
+  next();
 };

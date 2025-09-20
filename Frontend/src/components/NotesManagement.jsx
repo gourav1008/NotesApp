@@ -197,18 +197,20 @@ const NotesManagement = ({ userId }) => {
 
                                     <div className="card-actions justify-end mt-4 gap-2">
                                         <button
-                                            className="btn btn-ghost btn-sm"
+                                            className="btn btn-primary btn-outline btn-sm gap-1"
                                             onClick={() => handleEdit(note)}
+                                            title="Edit note"
                                         >
                                             <PencilIcon className="h-4 w-4" />
-                                            Edit
+                                            <span>Edit</span>
                                         </button>
                                         <button
-                                            className="btn btn-ghost btn-sm text-error hover:bg-error/10"
+                                            className="btn btn-error btn-outline btn-sm gap-1"
                                             onClick={() => handleDelete(note._id)}
+                                            title="Delete note"
                                         >
                                             <Trash2Icon className="h-4 w-4" />
-                                            Delete
+                                            <span>Delete</span>
                                         </button>
                                     </div>
                                 </div>

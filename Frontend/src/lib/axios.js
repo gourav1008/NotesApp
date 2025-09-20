@@ -40,6 +40,20 @@ api.interceptors.response.use(
       // Clear token on auth error
       localStorage.removeItem('token');
       error.message = 'Authentication failed. Please log in again.';
+      // Redirect to login if not already there
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    } else if (error.response.status === 403) {
+      // Handle blocked user or insufficient permissions
+      if (error.response.data?.isBlocked) {
+        localStorage.removeItem('token');
+        error.message = 'Your account has been blocked. Please contact support.';
+        // Redirect to login with blocked message
+        window.location.href = '/login?blocked=true';
+      } else {
+        error.message = error.response.data?.message || 'Access denied. Insufficient permissions.';
+      }
     } else if (error.response.status === 400) {
       error.message = error.response.data?.message || 'Invalid request. Please check your input.';
     } else if (error.response.status === 500) {

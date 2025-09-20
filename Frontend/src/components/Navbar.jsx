@@ -17,40 +17,45 @@ const Navbar = () => {
 
   return (
     <header className='bg-base-300 border-b border-base-content/10'>
-      <div className='container mx-auto px-4 py-3 sm:py-4'>
+      <nav className='container section-padding'>
         <div className='flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0'>
-          <Link to="/" className="w-full sm:w-auto text-center sm:text-left">
-            <h1 className='text-2xl sm:text-3xl font-bold text-primary font-mono tracking-tighter'>NoteBookApp</h1>
+          <Link to="/" className="nav-link w-full sm:w-auto text-center sm:text-left">
+            <h1 className='heading-responsive font-mono text-primary tracking-tighter'>NoteBookApp</h1>
           </Link>
-          <div className="flex flex-row">
-          <div className='flex sm:flex-row items-center gap-3 sm:gap-4 sm:w-auto'>
-            <Link to="/create" className='btn btn-secondary btn-sm sm:btn-md sm:w-auto sm:order-none'>
+          <div className="flex items-center gap-4">
+            <Link 
+              to="/create" 
+              className='btn btn-secondary btn-sm sm:btn-md hover-scale'
+            >
               <PlusIcon className='size-4 sm:size-5' />
               <span className='hidden sm:inline'>Create Note</span>
               <span className='sm:hidden'>New</span>
             </Link>
             {user && (
-              <div className='flex sm:flex-row items-center gap-3 sm:gap-4 sm:w-auto'>
-                <span className='text-lg sm:text-xl order-1 sm:order-none'>
+              <div className='flex items-center gap-4'>
+                <span className='text-responsive'>
                   Hello, {user.name.split(' ')[0]}
                 </span>
                 {user.isAdmin && (
-                  <Link to="/admin" className='btn btn-secondary btn-sm sm:btn-md  sm:w-auto order-3 sm:order-none'>
+                  <Link 
+                    to="/admin" 
+                    className='btn btn-secondary btn-sm sm:btn-md hover-scale'
+                  >
                     Admin
                   </Link>
                 )}
                 <button 
                   onClick={handleLogout} 
-                  className='btn btn-error btn-sm sm:btn-md  sm:w-auto order-2 sm:order-none'
+                  className='btn btn-error btn-sm sm:btn-md hover-scale'
+                  aria-label="Logout"
                 >
                   <LogOut />
                 </button>
               </div>
             )}
           </div>
-          </div>
         </div>
-      </div>
+      </nav>
     </header>
   )
 }

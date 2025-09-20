@@ -89,72 +89,68 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <div className="card bg-base-100">
-            <div className="card-body">
-              <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
-              <form onSubmit={onSubmit} className="space-y-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Name</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={name}
-                    onChange={onChange}
-                    required
-                    placeholder="Enter your name"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Email</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={onChange}
-                    required
-                    placeholder="Enter your email"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={onChange}
-                    required
-                    placeholder="Enter your password"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Confirm Password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={confirmPassword}
-                    onChange={onChange}
-                    required
-                    placeholder="Confirm your password"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="btn btn-primary w-full"
+    <div>
+      <h2 className="heading-responsive text-center mb-6">Register</h2>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="form-group">
+          <label className="label">
+            <span className="form-label">Name</span>
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={name}
+            onChange={onChange}
+            required
+            placeholder="Enter your name"
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label className="label">
+            <span className="form-label">Email</span>
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            onChange={onChange}
+            required
+            placeholder="Enter your email"
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label className="label">
+            <span className="form-label">Password</span>
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={password}
+            onChange={onChange}
+            required
+            placeholder="Enter your password"
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label className="label">
+            <span className="form-label">Confirm Password</span>
+          </label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={onChange}
+            required
+            placeholder="Confirm your password"
+            className="form-input"
+          />
+        </div>
+        <button
+          type="submit"
+          className="btn-primary-full hover-scale"
                 >
                   Register
                 </button>
@@ -167,10 +163,6 @@ const RegisterPage = () => {
                 </Link>
               </p>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 };
 

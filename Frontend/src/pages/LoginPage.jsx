@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 const LoginPage = () => {
   const { isAuthenticated, dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,7 +20,16 @@ const LoginPage = () => {
     if (isAuthenticated) {
       navigate("/");
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Check if user was redirected due to being blocked
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get('blocked') === 'true') {
+      toast.error('Your account has been blocked. Please contact support.', {
+        duration: 6000,
+        position: 'top-center'
+      });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,44 +89,40 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <div className="card bg-base-100">
-            <div className="card-body">
-              <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
-              <form onSubmit={onSubmit} className="space-y-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Email</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={onChange}
-                    required
-                    placeholder="Enter your email"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={onChange}
-                    required
-                    placeholder="Enter your password"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="btn btn-primary w-full"
+    <div>
+      <h2 className="heading-responsive text-center mb-6">Login</h2>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="form-group">
+          <label className="label">
+            <span className="form-label">Email</span>
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            onChange={onChange}
+            required
+            placeholder="Enter your email"
+            className="form-input"
+          />
+        </div>
+        <div className="form-group">
+          <label className="label">
+            <span className="form-label">Password</span>
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={password}
+            onChange={onChange}
+            required
+            placeholder="Enter your password"
+            className="form-input"
+          />
+        </div>
+        <button
+          type="submit"
+          className="btn-primary-full hover-scale"
                 >
                   Login
                 </button>
@@ -129,10 +135,7 @@ const LoginPage = () => {
                 </Link>
               </p>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          
   );
 };
 
