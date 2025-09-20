@@ -4,23 +4,41 @@ import User from "../models/User.js";
 export const protect = async (req, res, next) => {
   let token;
 
+  // Check for token in header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     try {
       token = req.headers.authorization.split(" ")[1];
+
+      // Check if JWT_SECRET is set
+      if (!process.env.JWT_SECRET) {
+        console.error("JWT_SECRET environment variable is not set!");
+        return res.status(500).json({ success: false, error: "Server configuration error" });
+      }
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Token decoded successfully for user:", decoded.id);
+
       req.user = await User.findById(decoded.id).select("-password");
+
+      if (!req.user) {
+        console.log("User not found for decoded token ID:", decoded.id);
+        return res.status(401).json({ success: false, error: "User not found" });
+      }
+
+      console.log("User authenticated successfully:", req.user.email);
       next();
     } catch (error) {
-      console.error(error);
-      res.status(401).json({ success: false, error: "Not authorized, token failed" });
+      console.error("Token verification failed:", error.message);
+      console.error("Token was:", token ? "present" : "not present");
+      return res.status(401).json({ success: false, error: "Not authorized, token failed" });
     }
-  }
-
-  if (!token) {
-    res.status(401).json({ success: false, error: "Not authorized, no token" });
+  } else {
+    console.log("No authorization header found");
+    console.log("Headers:", JSON.stringify(req.headers, null, 2));
+    return res.status(401).json({ success: false, error: "Not authorized, no token" });
   }
 };
 

@@ -31,7 +31,10 @@ const corsOptions = {
         ? [
             process.env.FRONTEND_URL, // Your deployed frontend URL
             process.env.RENDER_EXTERNAL_URL, // Render's external URL
-            process.env.VITE_API_URL // Sometimes needed for Vite
+            process.env.VITE_API_URL, // Sometimes needed for Vite
+            // Common Render patterns
+            /^https:\/\/.*\.onrender\.com$/,
+            /^https:\/\/.*-.*\.onrender\.com$/,
           ].filter(Boolean)
         : [
             'http://localhost:5173',
@@ -41,13 +44,28 @@ const corsOptions = {
           ];
 
     // Check if origin is allowed
-    if (allowedOrigins.includes(origin)) {
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return allowed === origin;
+      } else if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return false;
+    });
+
+    if (isAllowed) {
       return callback(null, true);
     }
 
     // Log the rejected origin for debugging
     console.log(`CORS rejected origin: ${origin}`);
-    console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+    console.log(`Allowed origins: ${allowedOrigins.map(o => typeof o === 'string' ? o : o.toString()).join(', ')}`);
+
+    // For development, be more permissive
+    if (process.env.NODE_ENV !== "production") {
+      console.log('Development mode: Allowing origin for debugging');
+      return callback(null, true);
+    }
 
     callback(new Error('Not allowed by CORS'));
   },

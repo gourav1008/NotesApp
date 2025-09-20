@@ -9,10 +9,13 @@ const rateLimit = {
 // Get user's notes
 export const getNotes = async (req, res) => {
     try {
+        console.log("getNotes called for user:", req.user.id, req.user.email);
         const notes = await Note.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        console.log(`Found ${notes.length} notes for user ${req.user.email}`);
         res.json(notes);
     } catch (error) {
         console.error("Error in getNotes:", error);
+        console.error("User ID:", req.user?.id);
         res.status(500).json({ message: "Failed to fetch notes" });
     }
 };

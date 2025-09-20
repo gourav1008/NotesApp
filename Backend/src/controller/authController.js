@@ -2,7 +2,13 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 const generateToken = (id) => {
-  const JWT_SECRET = process.env.JWT_SECRET || "anirban";
+  const JWT_SECRET = process.env.JWT_SECRET;
+
+  if (!JWT_SECRET) {
+    console.error("JWT_SECRET environment variable is not set!");
+    throw new Error("JWT_SECRET environment variable is required");
+  }
+
   return jwt.sign({ id }, JWT_SECRET, {
     expiresIn: "30d",
   });
