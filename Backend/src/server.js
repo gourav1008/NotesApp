@@ -18,30 +18,48 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Set your deployed frontend Render URL in .env as FRONTEND_URL=https://your-frontend-app.onrender.com
-const prodOrigin = process.env.FRONTEND_URL || 'https://your-frontend-app.onrender.com';
-const localOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-const allowedOrigins = process.env.NODE_ENV === "production"
-  ? [prodOrigin]
-  : localOrigins;
-
-// Robust CORS options
+// CORS Configuration - Fixed for production deployment
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow tools without origin (e.g. curl/postman)
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Get allowed origins from environment variable or use defaults
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(url => url.trim())
+      : process.env.NODE_ENV === "production"
+        ? [
+            process.env.FRONTEND_URL, // Your deployed frontend URL
+            process.env.RENDER_EXTERNAL_URL, // Render's external URL
+            process.env.VITE_API_URL // Sometimes needed for Vite
+          ].filter(Boolean)
+        : [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174'
+          ];
+
+    // Check if origin is allowed
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Log the rejected origin for debugging
+    console.log(`CORS rejected origin: ${origin}`);
+    console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+
     callback(new Error('Not allowed by CORS'));
   },
-  credentials: true, // critical for cookies/JWT
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Required for cookies and authentication
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range']
 };
 
-// Apply CORS globally
+// Apply CORS middleware
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increased limit for file uploads
 app.use(rateLimiter);
 
 // API routes
@@ -49,11 +67,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/notes', routerRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Serve static files (map to React build folder)
+// Serve static files from the React frontend app
 app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 
-// Handle React client-side routing while skipping API
+// Handle client-side routing - always return the main index.html
 app.get('*', (req, res, next) => {
+  // Don't handle /api routes here
   if (!req.url.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'), (err) => {
       if (err) {
@@ -66,7 +85,7 @@ app.get('*', (req, res, next) => {
   }
 });
 
-// Error handling middleware (must come after other app.use calls)
+// Error handling middleware (must be after routes)
 app.use(notFound);
 app.use(errorHandler);
 
@@ -74,6 +93,8 @@ app.use(errorHandler);
 dbconnect().then(() => {
   const server = app.listen(port, () => {
     console.log("Server is running on port:", port);
+    console.log("Environment:", process.env.NODE_ENV || 'development');
+    console.log("Frontend URL:", process.env.FRONTEND_URL || 'Not set');
   }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       console.log(`Port ${port} is in use, trying fallback port ${fallbackPort}...`);
