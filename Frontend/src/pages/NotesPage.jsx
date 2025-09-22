@@ -158,18 +158,20 @@ const NotesPage = () => {
             <div className="flex items-center gap-4 w-full sm:w-auto">
               <Link 
                 to="/" 
-                className="back-button"
+                className="btn btn-ghost btn-sm sm:btn-md gap-2 hover:gap-3 transition-all"
               >
-                <ArrowLeftIcon className="size-4" />
-                <span>Back to Notes</span>
+                <ArrowLeftIcon className="size-4 sm:size-5" />
+                <span className="hidden sm:inline">Back to Notes</span>
+                <span className="sm:hidden">Back</span>
               </Link>
             </div>
             <button 
               onClick={handleDelete} 
-              className="btn btn-error btn-outline btn-sm gap-2 w-fit"
+              className="btn btn-error btn-outline btn-sm sm:btn-md w-full sm:w-auto"
             >
-              <Trash2Icon className="size-4" />
-              <span>Delete Note</span>
+              <Trash2Icon className="size-4 sm:size-5" />
+              <span className="hidden sm:inline">Delete Note</span>
+              <span className="sm:hidden">Delete</span>
             </button>
           </div>
 
@@ -195,34 +197,18 @@ const NotesPage = () => {
                     <span className="label-text text-base sm:text-lg">Content</span>
                   </label>
                   <textarea
-                    placeholder="Write your note content here...
-
-💡 Tips:
-• Use bullet points for lists
-• Add line breaks for better readability
-• Edit and improve your content as needed"
-                    className="form-textarea min-h-[16rem]"
+                    placeholder="Write your note content here..."
+                    className="textarea textarea-bordered min-h-[12rem] sm:min-h-[16rem] w-full focus:textarea-primary transition-colors duration-200 font-mono text-sm sm:text-base"
                     value={note.content}
                     onChange={(e) => setNote({ ...note, content: e.target.value })}
                     required
-                    rows={14}
                   />
-                  <div className="flex justify-between items-center text-xs text-base-content/60 mt-1">
-                    <span>Characters: {note.content.length}</span>
-                    <span>Words: {note.content.trim() ? note.content.trim().split(/\s+/).length : 0}</span>
-                  </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4">
-                  <Link 
-                    to="/" 
-                    className="btn-content-ghost"
-                  >
-                    Cancel
-                  </Link>
+                <div className="card-actions justify-end pt-4">
                   <button 
                     type="submit" 
-                    className="btn-content" 
+                    className="btn btn-primary btn-sm sm:btn-md w-full sm:w-auto min-w-[8rem]" 
                     disabled={saving}
                   >
                     {saving ? (

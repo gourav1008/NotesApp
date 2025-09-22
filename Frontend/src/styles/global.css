@@ -1,5 +1,5 @@
-/* Global styles for consistent UI */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Modern Notes App Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,186 +8,107 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply min-h-screen bg-base-200;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Better touch targets for mobile */
+  button, a, input, textarea, select {
+    touch-action: manipulation;
   }
 }
 
-@layer components {
-  .auth-card {
-    @apply card bg-base-100 shadow-xl;
+@layer utilities {
+  /* Custom animations */
+  .fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
   }
 
-  .auth-card-body {
-    @apply card-body p-8 space-y-6;
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
 
-  .page-container {
-    @apply container mx-auto px-4 py-8;
-  }
-
-  .form-input {
-    @apply input input-bordered w-full;
-    transition: all 0.2s ease;
-  }
-
-  .form-input:focus {
-    @apply input-primary;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    transform: translateY(-1px);
-  }
-
-  .form-label {
-    @apply label-text font-medium;
-  }
-
-  .btn-primary-full {
-    @apply btn btn-primary w-full;
-  }
-
-  /* Content-sized buttons */
-  .btn-content {
-    @apply btn btn-primary;
-    width: fit-content;
-    min-width: auto;
-    padding: 0.5rem 1rem;
-  }
-
-  .btn-content-sm {
-    @apply btn btn-primary btn-sm;
-    width: fit-content;
-    min-width: auto;
-    padding: 0.25rem 0.75rem;
-  }
-
-  .btn-content-ghost {
-    @apply btn btn-ghost;
-    width: fit-content;
-    min-width: auto;
-    padding: 0.5rem 1rem;
-  }
-
-  .btn-back {
-    @apply btn btn-ghost btn-sm;
-    width: fit-content;
-    min-width: auto;
-    padding: 0.5rem 0.75rem;
-    gap: 0.5rem;
-  }
-
-  .card-container {
-    @apply max-w-md mx-auto;
+  .pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   /* Responsive text utilities */
-  .text-responsive {
-    @apply text-sm sm:text-base;
-  }
-
-  .heading-responsive {
-    @apply text-xl sm:text-2xl font-bold;
-  }
-
-  /* Form group styling */
-  .form-group {
-    @apply space-y-2;
-  }
-
-  /* Enhanced textarea styling */
-  .form-textarea {
-    @apply textarea textarea-bordered w-full resize-none;
-    min-height: 200px;
-    font-family: 'Inter', system-ui, sans-serif;
+  .text-fluid {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
     line-height: 1.6;
-    font-size: 0.95rem;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
   }
 
-  .form-textarea:focus {
-    @apply textarea-primary;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    transform: translateY(-1px);
+  .text-fluid-lg {
+    font-size: clamp(1rem, 3vw, 1.125rem);
+    line-height: 1.5;
   }
 
-  .form-textarea::placeholder {
-    @apply text-base-content/50;
-    font-style: italic;
+  .heading-fluid {
+    font-size: clamp(1.25rem, 4vw, 1.875rem);
+    font-weight: 700;
+    line-height: 1.2;
   }
 
-  /* Card layouts */
-  .card-grid {
-    @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+  .heading-fluid-lg {
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.1;
   }
 
-  /* Navigation styling */
-  .nav-link {
-    @apply hover:text-primary transition-colors;
-  }
-
-  /* Back button styling */
-  .back-button {
-    @apply btn btn-ghost btn-sm gap-2 hover:gap-3 transition-all;
-    width: fit-content;
-    min-width: auto;
-    padding: 0.5rem 0.75rem;
-  }
-
-  /* Responsive padding */
-  .section-padding {
-    @apply py-4 sm:py-6 lg:py-8;
-  }
-
-  /* Responsive margins */
-  .section-margin {
-    @apply my-4 sm:my-6 lg:my-8;
+  .heading-fluid-xl {
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
   }
 }
 
-/* Dark mode optimizations */
-.dark {
-  @apply bg-base-300;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Animation utilities */
-.fade-in {
-  @apply transition-opacity duration-200;
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
-.hover-scale {
-  @apply transition-transform hover:scale-105;
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up,
+  .hover-lift,
+  .pulse-soft {
+    animation: none;
+    transition: none;
+  }
 }
 
-/* Responsive container widths */
-.container {
-  @apply px-4 sm:px-6 lg:px-8;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-/* Form validation styles */
-.input-error {
-  @apply border-error focus:border-error;
-}
-
-.error-message {
-  @apply text-error text-sm mt-1;
-}
-
-/* Loading states */
-.loading-overlay {
-  @apply absolute inset-0 bg-base-200/50 flex items-center justify-center;
-}
-
-/* Accessibility improvements */
-.sr-only {
-  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-}
-
-/* Focus styles */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid;
+  }
+  
+  .btn {
+    border: 2px solid;
+  }
 }

@@ -9,19 +9,26 @@ const AdminProtectedRoute = ({ children }) => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-base-200 flex items-center justify-center">
-                <LoaderIcon className="animate-spin size-10" />
+            <div className="min-h-screen bg-base-200 flex flex-col items-center justify-center gap-4">
+                <LoaderIcon className="animate-spin w-12 h-12 text-primary" />
+                <p className="text-base-content/70 animate-pulse">Verifying admin access...</p>
             </div>
         );
     }
 
     if (!isAuthenticated) {
-        toast.error('Please login to access admin dashboard');
+        toast.error('Please login to access the admin dashboard', {
+            icon: '🔒',
+            duration: 4000
+        });
         return <Navigate to="/login" replace />;
     }
 
     if (!user || !user.isAdmin) {
-        toast.error('Access denied. Admin privileges required');
+        toast.error('Access denied. This area requires admin privileges', {
+            icon: '⚠️',
+            duration: 4000
+        });
         return <Navigate to="/" replace />;
     }
 

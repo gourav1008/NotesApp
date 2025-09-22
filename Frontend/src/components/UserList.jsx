@@ -12,7 +12,9 @@ import {
     SortDescIcon,
     UserCheckIcon,
     UserXIcon,
-    StickyNoteIcon
+    StickyNoteIcon,
+    SearchIcon,
+    EyeIcon
 } from 'lucide-react';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
@@ -213,195 +215,235 @@ const UserList = ({ onUserSelect, onUserAction }) => {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Search and Filters */}
-            <div className="card bg-base-100 shadow-sm">
-                <div className="card-body p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* Search */}
-                        <div className="form-control">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Search users..."
-                                    className="input input-bordered input-sm w-full pl-10"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                        </div>
-                        
-                        {/* Status Filter */}
-                        <div className="form-control">
-                            <select 
-                                className="select select-bordered select-sm"
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                                <option value="all">All Users</option>
-                                <option value="active">Active Users</option>
-                                <option value="blocked">Blocked Users</option>
-                                <option value="admin">Admin Users</option>
-                            </select>
-                        </div>
-                        
-                        {/* Sort By */}
-                        <div className="form-control">
-                            <select 
-                                className="select select-bordered select-sm"
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                            >
-                                <option value="createdAt">Date Created</option>
-                                <option value="name">Name</option>
-                                <option value="email">Email</option>
-                                <option value="notesCount">Notes Count</option>
-                            </select>
-                        </div>
-                        
-                        {/* Sort Order */}
-                        <div className="form-control">
-                            <button 
-                                className="btn btn-outline btn-sm"
-                                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                            >
-                                {sortOrder === 'asc' ? (
-                                    <><SortAscIcon className="h-4 w-4" /> Ascending</>
-                                ) : (
-                                    <><SortDescIcon className="h-4 w-4" /> Descending</>
-                                )}
-                            </button>
-                        </div>
+        <div className="space-y-4 sm:space-y-6">
+            {/* Mobile Search Section */}
+            <div className="sm:hidden">
+                <div className="form-control w-full mb-3">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            className="input input-bordered input-sm w-full pl-9 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <SearchIcon className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 opacity-50" />
                     </div>
-                    
-                    {/* Results count */}
-                    <div className="text-sm opacity-70 mt-2">
-                        Showing {filteredAndSortedUsers.length} of {users.length} users
-                    </div>
+                </div>
+                <div className="flex gap-2 mb-3">
+                    <select
+                        className="select select-bordered select-sm flex-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="blocked">Blocked</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <select
+                        className="select select-bordered select-sm flex-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        value={`${sortBy}-${sortOrder}`}
+                        onChange={(e) => {
+                            const [field, order] = e.target.value.split('-');
+                            setSortBy(field);
+                            setSortOrder(order);
+                        }}
+                    >
+                        <option value="createdAt-desc">Newest First</option>
+                        <option value="createdAt-asc">Oldest First</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                        <option value="email-asc">Email A-Z</option>
+                        <option value="notesCount-desc">Most Notes</option>
+                    </select>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-                {filteredAndSortedUsers.map(user => {
-                    const stats = userStats[user._id] || { totalNotes: 0, lastUpdate: null };
-                    const isActionLoading = actionLoading === user._id;
+            {/* Desktop Search and Filters */}
+            <div className="hidden sm:flex flex-col lg:flex-row gap-4 items-center">
+                <div className="form-control flex-1 w-full">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search users by name or email..."
+                            className="input input-bordered w-full pl-10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 opacity-50" />
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <select
+                        className="select select-bordered focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="blocked">Blocked</option>
+                        <option value="admin">Admin</option>
+                    </select>
                     
-                    return (
-                        <div
-                            key={user._id}
-                            className="card bg-base-100 shadow-sm hover:shadow-md transition-all"
-                        >
-                            <div className="card-body p-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4 flex-1">
-                                        <div className="avatar placeholder">
-                                            <div className={`rounded-full w-12 ${
-                                                user.isAdmin 
-                                                    ? 'bg-primary text-primary-content'
-                                                    : user.isBlocked 
-                                                        ? 'bg-error text-error-content'
-                                                        : 'bg-neutral text-neutral-content'
-                                            }`}>
-                                                <span className="text-xl">{user.name.charAt(0).toUpperCase()}</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="text-lg font-bold">{user.name}</h3>
-                                                {getUserStatusBadge(user)}
-                                            </div>
-                                            <p className="text-base-content/70 text-sm">{user.email}</p>
-                                            
-                                            <div className="flex items-center gap-4 mt-2 text-xs opacity-70">
-                                                <div className="flex items-center gap-1">
-                                                    <BookOpenIcon className="h-3 w-3" />
-                                                    <span>{stats.totalNotes} notes</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <ClockIcon className="h-3 w-3" />
-                                                    <span>
-                                                        {stats.lastUpdate
-                                                            ? `Updated ${new Date(stats.lastUpdate).toLocaleDateString()}`
-                                                            : 'No activity'}
-                                                    </span>
-                                                </div>
-                                                {user.isBlocked && user.blockedAt && (
-                                                    <div className="flex items-center gap-1 text-error">
-                                                        <UserXIcon className="h-3 w-3" />
-                                                        <span>Blocked {new Date(user.blockedAt).toLocaleDateString()}</span>
-                                                    </div>
-                                                )}
-                                            </div>
+                    <select
+                        className="select select-bordered focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+                        value={`${sortBy}-${sortOrder}`}
+                        onChange={(e) => {
+                            const [field, order] = e.target.value.split('-');
+                            setSortBy(field);
+                            setSortOrder(order);
+                        }}
+                    >
+                        <option value="createdAt-desc">Newest First</option>
+                        <option value="createdAt-asc">Oldest First</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                        <option value="email-asc">Email A-Z</option>
+                        <option value="notesCount-desc">Most Notes</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Results count */}
+            <div className="text-sm text-base-content/70 mb-4">
+                Showing {filteredAndSortedUsers.length} of {users.length} users
+            </div>
+
+            {/* Users Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                {filteredAndSortedUsers.map((user) => (
+                    <div key={user._id} className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200 border border-base-300/50 h-full">
+                        <div className="card-body p-3 sm:p-4">
+                            {/* Mobile Layout */}
+                            <div className="sm:hidden">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="avatar placeholder">
+                                        <div className="bg-primary text-primary-content rounded-full w-8">
+                                            <span className="text-xs font-bold">{user.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                     </div>
-                                    
-                                    {/* Action buttons */}
-                                    <div className="flex items-center gap-2">
-                                        {/* View Notes */}
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold text-sm truncate">{user.name}</h3>
+                                        <p className="text-xs text-base-content/70 truncate">{user.email}</p>
+                                    </div>
+                                    {getUserStatusBadge(user)}
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                                    <div className="bg-base-200 p-2 rounded">
+                                        <span className="text-base-content/60">Notes</span>
+                                        <p className="font-semibold">{user.notesCount || 0}</p>
+                                    </div>
+                                    <div className="bg-base-200 p-2 rounded">
+                                        <span className="text-base-content/60">Joined</span>
+                                        <p className="font-semibold">{new Date(user.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-1">
+                                    <button
+                                        className="btn btn-primary btn-xs flex-1 gap-1"
+                                        onClick={() => onUserSelect(user._id)}
+                                    >
+                                        <EyeIcon className="w-3 h-3" />
+                                        View
+                                    </button>
+                                    {canPerformAction(user, 'block') && (
                                         <button
-                                            className="btn btn-ghost btn-sm"
-                                            onClick={() => onUserSelect(user._id)}
-                                            title="View user notes"
+                                            className={`btn btn-xs gap-1 ${
+                                                user.isBlocked ? 'btn-success' : 'btn-warning'
+                                            }`}
+                                            onClick={() => openConfirmDialog(user.isBlocked ? 'unblock' : 'block', user, user.isBlocked ? 'unblock' : 'block')}
+                                            disabled={actionLoading}
                                         >
-                                            <StickyNoteIcon className="h-4 w-4" />
+                                            {user.isBlocked ? (
+                                                <UserCheckIcon className="w-3 h-3" />
+                                            ) : (
+                                                <UserXIcon className="w-3 h-3" />
+                                            )}
                                         </button>
-                                        
-                                        {/* Block/Unblock */}
-                                        {canPerformAction(user, 'block') && (
-                                            <button
-                                                className="btn btn-warning btn-sm"
-                                                onClick={() => openConfirmDialog('block', user, 'block')}
-                                                disabled={isActionLoading}
-                                                title="Block user"
-                                            >
-                                                {isActionLoading ? (
-                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                ) : (
-                                                    <ShieldOffIcon className="h-4 w-4" />
-                                                )}
-                                            </button>
-                                        )}
-                                        
-                                        {canPerformAction(user, 'unblock') && (
-                                            <button
-                                                className="btn btn-success btn-sm"
-                                                onClick={() => openConfirmDialog('unblock', user, 'unblock')}
-                                                disabled={isActionLoading}
-                                                title="Unblock user"
-                                            >
-                                                {isActionLoading ? (
-                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                ) : (
-                                                    <ShieldIcon className="h-4 w-4" />
-                                                )}
-                                            </button>
-                                        )}
-                                        
-                                        {/* Delete */}
-                                        {canPerformAction(user, 'delete') && (
-                                            <button
-                                                className="btn btn-error btn-sm"
-                                                onClick={() => openConfirmDialog('delete', user, 'delete')}
-                                                disabled={isActionLoading}
-                                                title="Delete user permanently"
-                                            >
-                                                {isActionLoading ? (
-                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                ) : (
-                                                    <TrashIcon className="h-4 w-4" />
-                                                )}
-                                            </button>
-                                        )}
+                                    )}
+                                    {canPerformAction(user, 'delete') && (
+                                        <button
+                                            className="btn btn-error btn-xs gap-1"
+                                            onClick={() => openConfirmDialog('delete', user, 'delete')}
+                                            disabled={actionLoading}
+                                        >
+                                            <TrashIcon className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Desktop Layout */}
+                            <div className="hidden sm:block">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="avatar placeholder">
+                                            <div className="bg-primary text-primary-content rounded-full w-10 sm:w-12">
+                                                <span className="text-sm sm:text-lg">{user.name.charAt(0).toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-base sm:text-lg">{user.name}</h3>
+                                            <p className="text-xs sm:text-sm opacity-70">{user.email}</p>
+                                        </div>
                                     </div>
+                                    {getUserStatusBadge(user)}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <StickyNoteIcon className="h-4 w-4 opacity-60" />
+                                        <span className="opacity-70">Notes:</span>
+                                        <span className="font-semibold">{userStats[user._id]?.totalNotes || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <ClockIcon className="h-4 w-4 opacity-60" />
+                                        <span className="opacity-70">Joined:</span>
+                                        <span className="font-semibold">{new Date(user.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                    <button
+                                        className="btn btn-primary btn-sm flex-1 gap-2"
+                                        onClick={() => onUserSelect(user._id)}
+                                    >
+                                        <EyeIcon className="h-4 w-4" />
+                                        View Profile
+                                    </button>
+                                    
+                                    {canPerformAction(user, user.isBlocked ? 'unblock' : 'block') && (
+                                        <button
+                                            className={`btn btn-sm gap-2 ${
+                                                user.isBlocked ? 'btn-success' : 'btn-warning'
+                                            }`}
+                                            onClick={() => openConfirmDialog(user.isBlocked ? 'unblock' : 'block', user, user.isBlocked ? 'unblock' : 'block')}
+                                            disabled={actionLoading === user._id}
+                                        >
+                                            {user.isBlocked ? (
+                                                <><UserCheckIcon className="h-4 w-4" /> Unblock</>
+                                            ) : (
+                                                <><UserXIcon className="h-4 w-4" /> Block</>
+                                            )}
+                                        </button>
+                                    )}
+                                    
+                                    {canPerformAction(user, 'delete') && (
+                                        <button
+                                            className="btn btn-error btn-sm gap-2"
+                                            onClick={() => openConfirmDialog('delete', user, 'delete')}
+                                            disabled={actionLoading === user._id}
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                            Delete
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    );
-                })}
+                    </div>
+                ))}
             </div>
 
             {filteredAndSortedUsers.length === 0 && (
@@ -449,10 +491,6 @@ const UserList = ({ onUserSelect, onUserAction }) => {
             />
         </div>
     );
-};
-
-UserList.defaultProps = {
-    onUserAction: null
 };
 
 export default UserList;
