@@ -77,7 +77,7 @@ const NoteCard = ({note, setNotes}) => {
                     </span>
                     <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                         <Link 
-                            to={`/notes/${note._id}/edit`} 
+                            to={`/notes/${note._id}`} 
                             onClick={(e) => e.stopPropagation()} 
                             className="icon-button"
                             title="Edit note"

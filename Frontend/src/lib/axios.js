@@ -59,7 +59,7 @@ api.interceptors.response.use(
     } else if (error.response.status === 500) {
       error.message = 'Server error. Please try again later.';
     }
-    
+
     return Promise.reject(error);
   }
 );

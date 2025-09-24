@@ -27,21 +27,12 @@ const corsOptions = {
     // Get allowed origins from environment variable or use defaults
     const allowedOrigins = process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(',').map(url => url.trim())
-      : process.env.NODE_ENV === "production"
-        ? [
-            process.env.FRONTEND_URL, // Your deployed frontend URL
-            process.env.RENDER_EXTERNAL_URL, // Render's external URL
-            process.env.VITE_API_URL, // Sometimes needed for Vite
-            // Common Render patterns
-            /^https:\/\/.*\.onrender\.com$/,
-            /^https:\/\/.*-.*\.onrender\.com$/,
-          ].filter(Boolean)
-        : [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'http://127.0.0.1:5173',
-            'http://127.0.0.1:5174'
-          ];
+      : [
+          'http://localhost:5173',
+          'http://localhost:5174',
+          'http://127.0.0.1:5173',
+          'http://127.0.0.1:5174'
+        ];
 
     // Check if origin is allowed
     const isAllowed = allowedOrigins.some(allowed => {
@@ -110,17 +101,37 @@ app.use(errorHandler);
 // Connect DB and listen
 dbconnect().then(() => {
   const server = app.listen(port, () => {
-    console.log("Server is running on port:", port);
-    console.log("Environment:", process.env.NODE_ENV || 'development');
-    console.log("Frontend URL:", process.env.FRONTEND_URL || 'Not set');
+    console.log("✅ Server is running on port:", port);
+    console.log("🌍 Environment:", process.env.NODE_ENV || 'development');
+    console.log("🔗 Frontend URL:", process.env.FRONTEND_URL || 'Not set');
+    console.log("📊 Database connected successfully");
   }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is in use, trying fallback port ${fallbackPort}...`);
+      console.log(`⚠️ Port ${port} is in use, trying fallback port ${fallbackPort}...`);
       app.listen(fallbackPort, () => {
-        console.log("Server is running on fallback port:", fallbackPort);
+        console.log("✅ Server is running on fallback port:", fallbackPort);
       });
     } else {
-      console.error("Server error:", err);
+      console.error("❌ Server error:", err);
+      process.exit(1);
     }
   });
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('🔄 SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      console.log('✅ Process terminated');
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('🔄 SIGINT received, shutting down gracefully');
+    server.close(() => {
+      console.log('✅ Process terminated');
+    });
+  });
+}).catch((error) => {
+  console.error("❌ Database connection failed:", error);
+  process.exit(1);
 });
