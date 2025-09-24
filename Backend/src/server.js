@@ -9,6 +9,7 @@ import cors from 'cors';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getCorsOptions } from './config/cors.js';
 
 dotenv.config();
 const port = process.env.PORT || 5001;
@@ -18,58 +19,10 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// CORS Configuration - Fixed for production deployment
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // Get allowed origins from environment variable or use defaults
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map(url => url.trim())
-      : [
-          'http://localhost:5173',
-          'http://localhost:5174',
-          'http://127.0.0.1:5173',
-          'http://127.0.0.1:5174'
-        ];
-
-    // Check if origin is allowed
-    const isAllowed = allowedOrigins.some(allowed => {
-      if (typeof allowed === 'string') {
-        return allowed === origin;
-      } else if (allowed instanceof RegExp) {
-        return allowed.test(origin);
-      }
-      return false;
-    });
-
-    if (isAllowed) {
-      return callback(null, true);
-    }
-
-    // Log the rejected origin for debugging
-    console.log(`CORS rejected origin: ${origin}`);
-    console.log(`Allowed origins: ${allowedOrigins.map(o => typeof o === 'string' ? o : o.toString()).join(', ')}`);
-
-    // For development, be more permissive
-    if (process.env.NODE_ENV !== "production") {
-      console.log('Development mode: Allowing origin for debugging');
-      return callback(null, true);
-    }
-
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true, // Required for cookies and authentication
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
-};
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
+// Middlewares
+app.use(cors(getCorsOptions()));
 app.use(express.json({ limit: '10mb' })); // Increased limit for file uploads
-app.use(rateLimiter);
+app.use(rateLimiter); // Apply rate limiter to all routes
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -77,22 +30,23 @@ app.use('/api/notes', routerRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files
+  app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 
-// Handle client-side routing - always return the main index.html
-app.get('*', (req, res, next) => {
-  // Don't handle /api routes here
-  if (!req.url.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'), (err) => {
+  // Handle client-side routing
+  app.get('*', (req, res, next) => {
+    if (req.url.startsWith('/api')) {
+      return next(); // Skip for API routes
+    }
+    res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'), err => {
       if (err) {
         console.error('Error sending file:', err);
         res.status(500).send('Error loading application');
       }
     });
-  } else {
-    next();
-  }
-});
+  });
+}
 
 // Error handling middleware (must be after routes)
 app.use(notFound);

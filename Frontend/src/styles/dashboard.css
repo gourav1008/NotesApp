@@ -1,0 +1,159 @@
+/* Dashboard Container */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: var(--base-200);
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-container {
+    padding: 2rem;
+  }
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+/* Dashboard Card */
+.dashboard-card {
+  background-color: var(--base-100);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Card Header */
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--base-300);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--base-content);
+}
+
+/* Card Content */
+.card-content {
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--base-300);
+  background-color: rgba(var(--base-200-rgb), 0.5);
+}
+
+/* User Card Specific */
+.user-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.user-card:hover {
+  background-color: var(--base-200);
+}
+
+.user-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background-color: rgba(var(--primary-rgb), 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info {
+  flex-grow: 1;
+}
+
+.user-name {
+  font-weight: 500;
+  color: var(--base-content);
+}
+
+.user-email {
+  font-size: 0.875rem;
+  color: rgba(var(--base-content-rgb), 0.7);
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .user-actions {
+    margin-top: 0.75rem;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+/* Animations */
+.dashboard-card {
+  animation: cardEntry 0.3s ease-out;
+}
+
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accessibility Improvements */
+.user-actions button {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Touch Target Sizes */
+@media (max-width: 768px) {
+  .user-actions button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}

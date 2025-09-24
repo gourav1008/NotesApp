@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-    UsersIcon, 
-    NotebookIcon, 
-    MessageSquareIcon, 
-    ArrowLeftIcon, 
+import {
+    UsersIcon,
+    NotebookIcon,
+    MessageSquareIcon,
+    ArrowLeftIcon,
     XIcon,
     ClockIcon,
     StickyNoteIcon,
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
     const handleUserSelect = async (userId) => {
         setSelectedUserId(userId);
         setShowAdminNotes(false);
-        
+
         // Fetch user details
         try {
             const response = await api.get(`/admin/user-details/${userId}`);
@@ -60,8 +60,8 @@ const AdminDashboard = () => {
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-                    <Link 
-                        to="/" 
+                    <Link
+                        to="/"
                         className="btn btn-ghost btn-sm gap-2 hover:gap-3 transition-all duration-200 min-h-10 h-auto px-3 py-2"
                     >
                         <ArrowLeftIcon className="w-4 h-4" />
@@ -80,17 +80,16 @@ const AdminDashboard = () => {
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
-                            className={`btn ${
-                                activeTab === tab.id 
-                                    ? 'btn-primary' 
+                            className={`btn ${activeTab === tab.id
+                                    ? 'btn-primary'
                                     : 'btn-ghost hover:bg-base-200'
-                            } w-full gap-2 transition-all duration-200`}
+                                } w-full gap-2 transition-all duration-200`}
                             onClick={() => setActiveTab(tab.id)}
                         >
                             {tab.icon}
                             <span className="text-sm sm:text-base">{tab.label}</span>
-                            {tab.id === 'users' && (
-                                <div className="badge badge-sm badge-ghost">12</div>
+                            {tab.id === 'users' && selectedUser?.totalUsers && (
+                                <div className="badge badge-sm badge-ghost">{selectedUser.totalUsers}</div>
                             )}
                         </button>
                     ))}
@@ -116,8 +115,8 @@ const AdminDashboard = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <UserList 
-                                    onUserSelect={handleUserSelect} 
+                                <UserList
+                                    onUserSelect={handleUserSelect}
                                     onUserAction={handleUserAction}
                                 />
                             </div>
@@ -165,18 +164,16 @@ const AdminDashboard = () => {
                                     )}
                                     <div className="join w-full mb-4">
                                         <button
-                                            className={`join-item btn btn-sm flex-1 ${
-                                                !showAdminNotes ? 'btn-primary' : 'btn-ghost'
-                                            }`}
+                                            className={`join-item btn btn-sm flex-1 ${!showAdminNotes ? 'btn-primary' : 'btn-ghost'
+                                                }`}
                                             onClick={() => setShowAdminNotes(false)}
                                         >
                                             <NotebookIcon className="w-4 h-4" />
                                             User Notes
                                         </button>
                                         <button
-                                            className={`join-item btn btn-sm flex-1 ${
-                                                showAdminNotes ? 'btn-primary' : 'btn-ghost'
-                                            }`}
+                                            className={`join-item btn btn-sm flex-1 ${showAdminNotes ? 'btn-primary' : 'btn-ghost'
+                                                }`}
                                             onClick={() => setShowAdminNotes(true)}
                                         >
                                             <StickyNoteIcon className="w-4 h-4" />
@@ -202,7 +199,7 @@ const AdminDashboard = () => {
                                             Close
                                         </button>
                                     </div>
-                                    
+
                                     {selectedUser && (
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
@@ -232,18 +229,16 @@ const AdminDashboard = () => {
                                             </div>
                                             <div className="join">
                                                 <button
-                                                    className={`join-item btn btn-sm gap-2 ${
-                                                        !showAdminNotes ? 'btn-primary' : 'btn-ghost'
-                                                    }`}
+                                                    className={`join-item btn btn-sm gap-2 ${!showAdminNotes ? 'btn-primary' : 'btn-ghost'
+                                                        }`}
                                                     onClick={() => setShowAdminNotes(false)}
                                                 >
                                                     <NotebookIcon className="w-4 h-4" />
                                                     User Notes
                                                 </button>
                                                 <button
-                                                    className={`join-item btn btn-sm gap-2 ${
-                                                        showAdminNotes ? 'btn-primary' : 'btn-ghost'
-                                                    }`}
+                                                    className={`join-item btn btn-sm gap-2 ${showAdminNotes ? 'btn-primary' : 'btn-ghost'
+                                                        }`}
                                                     onClick={() => setShowAdminNotes(true)}
                                                 >
                                                     <StickyNoteIcon className="w-4 h-4" />
@@ -253,10 +248,10 @@ const AdminDashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 {showAdminNotes ? (
-                                    <AdminNotes 
-                                        userId={selectedUserId} 
+                                    <AdminNotes
+                                        userId={selectedUserId}
                                         userName={selectedUser?.name}
                                     />
                                 ) : (

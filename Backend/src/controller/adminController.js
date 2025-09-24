@@ -128,11 +128,21 @@ export const getUserNotes = async (req, res) => {
 export const getUserDetails = async (req, res) => {
     try {
         const { userId } = req.params;
-        const user = await User.findById(userId).select('-password');
+        const [user, totalUsers] = await Promise.all([
+            User.findById(userId).select('-password'),
+            User.countDocuments()
+        ]);
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json(user);
+
+        const userDetails = {
+            ...user.toObject(),
+            totalUsers
+        };
+
+        res.status(200).json(userDetails);
     } catch (error) {
         console.error("Error fetching user details:", error);
         res.status(500).json({ message: "Internal Server Error!" });
@@ -144,10 +154,10 @@ export const deleteUser = async (req, res) => {
     try {
         const { userId } = req.params;
         const { confirmation } = req.body;
-        
+
         if (!confirmation || confirmation !== 'DELETE') {
-            return res.status(400).json({ 
-                message: "Please provide confirmation by typing 'DELETE'" 
+            return res.status(400).json({
+                message: "Please provide confirmation by typing 'DELETE'"
             });
         }
 
@@ -157,35 +167,35 @@ export const deleteUser = async (req, res) => {
         }
 
         if (user.isAdmin) {
-            return res.status(403).json({ 
-                message: "Cannot delete admin users" 
+            return res.status(403).json({
+                message: "Cannot delete admin users"
             });
         }
 
         // Delete user's notes
         await Note.deleteMany({ userId });
-        
+
         // Delete user's messages
-        await Message.deleteMany({ 
-            $or: [{ sender: userId }, { recipient: userId }] 
+        await Message.deleteMany({
+            $or: [{ sender: userId }, { recipient: userId }]
         });
-        
+
         // Delete admin notes about this user
         await AdminNote.deleteMany({ userId });
-        
+
         // Delete the user
         await User.findByIdAndDelete(userId);
 
         // Log the action
         await logAdminAction(
-            req.user._id, 
-            'DELETE_USER', 
-            userId, 
+            req.user._id,
+            'DELETE_USER',
+            userId,
             `Permanently deleted user: ${user.name} (${user.email})`
         );
 
-        res.status(200).json({ 
-            message: "User and all associated data deleted successfully" 
+        res.status(200).json({
+            message: "User and all associated data deleted successfully"
         });
     } catch (error) {
         console.error("Error deleting user:", error);
@@ -205,14 +215,14 @@ export const blockUser = async (req, res) => {
         }
 
         if (user.isAdmin) {
-            return res.status(403).json({ 
-                message: "Cannot block admin users" 
+            return res.status(403).json({
+                message: "Cannot block admin users"
             });
         }
 
         if (user.isBlocked) {
-            return res.status(400).json({ 
-                message: "User is already blocked" 
+            return res.status(400).json({
+                message: "User is already blocked"
             });
         }
 
@@ -224,13 +234,13 @@ export const blockUser = async (req, res) => {
 
         // Log the action
         await logAdminAction(
-            req.user._id, 
-            'BLOCK_USER', 
-            userId, 
+            req.user._id,
+            'BLOCK_USER',
+            userId,
             `Blocked user: ${user.name} (${user.email}). Reason: ${reason || 'No reason provided'}`
         );
 
-        res.status(200).json({ 
+        res.status(200).json({
             message: "User blocked successfully",
             user: {
                 _id: user._id,
@@ -258,8 +268,8 @@ export const unblockUser = async (req, res) => {
         }
 
         if (!user.isBlocked) {
-            return res.status(400).json({ 
-                message: "User is not blocked" 
+            return res.status(400).json({
+                message: "User is not blocked"
             });
         }
 
@@ -271,13 +281,13 @@ export const unblockUser = async (req, res) => {
 
         // Log the action
         await logAdminAction(
-            req.user._id, 
-            'UNBLOCK_USER', 
-            userId, 
+            req.user._id,
+            'UNBLOCK_USER',
+            userId,
             `Unblocked user: ${user.name} (${user.email}). Reason: ${reason || 'No reason provided'}`
         );
 
-        res.status(200).json({ 
+        res.status(200).json({
             message: "User unblocked successfully",
             user: {
                 _id: user._id,
@@ -299,8 +309,8 @@ export const addAdminNote = async (req, res) => {
         const { content, richText } = req.body;
 
         if (!content) {
-            return res.status(400).json({ 
-                message: "Note content is required" 
+            return res.status(400).json({
+                message: "Note content is required"
             });
         }
 
@@ -321,9 +331,9 @@ export const addAdminNote = async (req, res) => {
 
         // Log the action
         await logAdminAction(
-            req.user._id, 
-            'ADD_NOTE', 
-            userId, 
+            req.user._id,
+            'ADD_NOTE',
+            userId,
             `Added admin note for user: ${user.name} (${user.email})`
         );
 
@@ -377,8 +387,8 @@ export const updateAdminNote = async (req, res) => {
         const { content, richText } = req.body;
 
         if (!content) {
-            return res.status(400).json({ 
-                message: "Note content is required" 
+            return res.status(400).json({
+                message: "Note content is required"
             });
         }
 
@@ -394,9 +404,9 @@ export const updateAdminNote = async (req, res) => {
 
         // Log the action
         await logAdminAction(
-            req.user._id, 
-            'UPDATE_NOTE', 
-            adminNote.userId._id, 
+            req.user._id,
+            'UPDATE_NOTE',
+            adminNote.userId._id,
             `Updated admin note for user: ${adminNote.userId.name} (${adminNote.userId.email})`
         );
 
@@ -428,9 +438,9 @@ export const deleteAdminNote = async (req, res) => {
 
         // Log the action
         await logAdminAction(
-            req.user._id, 
-            'DELETE_NOTE', 
-            userId, 
+            req.user._id,
+            'DELETE_NOTE',
+            userId,
             `Deleted admin note for user: ${userName} (${userEmail})`
         );
 
