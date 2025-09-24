@@ -46,8 +46,20 @@ const LoginPage = () => {
     }
 
     try {
-      // Show loading toast
-      const loadingToast = toast.loading("Logging in...");
+      // Show loading toast with custom styling
+      // const loadingToast = toast.loading(
+      //   "Signing you in...", 
+      //   {
+      //     icon: '🔄',
+      //     style: {
+      //       background: 'var(--base-100)',
+      //       color: 'var(--base-content)',
+      //       padding: '16px',
+      //       borderRadius: '8px',
+      //       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      //     }
+      //   }
+      // );
 
       const res = await api.post("/auth/login", {
         email: trimmedEmail,
@@ -60,7 +72,7 @@ const LoginPage = () => {
       });
 
       // Dismiss loading toast
-      toast.dismiss(loadingToast);
+      // toast.dismiss(loadingToast);
 
       if (!res.data || !res.data.token) {
         throw new Error("Invalid response from server");
